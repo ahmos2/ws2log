@@ -1,5 +1,4 @@
-import json
-import syslog
+import json,syslog,argparse
 from ws4py.client.threadedclient import WebSocketClient
 
 class wslogclient(WebSocketClient):
@@ -16,7 +15,11 @@ class wslogclient(WebSocketClient):
         else:
             print "Unknown type",str(message)
 
-client=wslogclient('wss://128.39.165.228:8080/ws')
+parser=argparse.ArgumentParser()
+parser.add_argument('websocket',default='wss://128.39.165.228:8080/ws')
+args=parser.parse_args()
+
+client=wslogclient(args.websocket)
 client.daemon=False
 syslog.openlog('ws2log',syslog.LOG_PID|syslog.LOG_CONS|syslog.LOG_PERROR)
 
