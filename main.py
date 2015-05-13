@@ -1,4 +1,4 @@
-import json,syslog,argparse
+import json,syslog,argparse,base64
 from ws4py.client.threadedclient import WebSocketClient
 
 class wslogclient(WebSocketClient):
@@ -16,11 +16,16 @@ class wslogclient(WebSocketClient):
             print "Unknown type",str(message)
 
 parser=argparse.ArgumentParser()
-parser.add_argument('websocket',default='wss://128.39.165.228:8080/ws')
+parser.add_argument('--websocket',default='wss://128.39.165.228:8080/ws')
+parser.add_argument('--syslogname',default="ws2log")
+parser.add_argument('--username',default="ws2log")
+parser.add_argument('--password',default="ws2log")
 args=parser.parse_args()
 
-client=wslogclient(args.websocket)
+if args.username:
+    client=wslogclient(args.websocket, headers=[("Authorization: Basic ",base64.b64encode(args.username+":"+args.password))])
+else:
+    client=wslogclient(args.websocket)
 client.daemon=False
-syslog.openlog('ws2log',syslog.LOG_PID|syslog.LOG_CONS|syslog.LOG_PERROR)
-
+syslog.openlog(args.syslogname,syslog.LOG_PID|syslog.LOG_CONS|syslog.LOG_PERROR)
 client.connect()
